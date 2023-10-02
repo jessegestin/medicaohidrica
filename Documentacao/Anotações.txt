@@ -1,0 +1,13 @@
+1 - Logar
+	http://127.0.0.1:8000/auth/login/
+	http://127.0.0.1:8000/auth/sair/
+	
+2 - http://127.0.0.1:8000/divulgar/novo_registro/
+
+3 - http://127.0.0.1:8000/divulgar/seus_registros/
+
+4 - http://127.0.0.1:8000/divulgar/ver_registro/1
+
+5 - http://127.0.0.1:8000/divulgar/dashboard/
+
+Documentação = https://docs.google.com/document/d/1HeUPsu3gDJ9mCednsBXIvu4s6qnPvbQDEzgQDwbHfHg/edit?pli=1

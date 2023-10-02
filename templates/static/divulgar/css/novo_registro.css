@@ -1,6 +1,6 @@
 .sidebar{
     text-align: center;
-    padding: 20px;
+    padding: 30px;
 
 }
 .wrapper {
@@ -12,7 +12,7 @@
 }
 
 .box {
-    padding:20px;
+    padding:50px;
     width: 50vw;
     background: rgb(238, 238, 238);
     box-shadow: 4px 4px 10px rgba(0,0,0,.3);
