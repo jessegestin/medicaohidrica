@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Tag, Raca, Pet
+from .models import Medicao
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.shortcuts import redirect
@@ -10,87 +10,54 @@ from django.views.decorators.csrf import csrf_exempt
 @login_required
 def novo_registro(request):
     if request.method == "GET":
-        tags = Tag.objects.all()
-        racas = Raca.objects.all()
-        return render(request, 'novo_registro.html', {'tags':tags, 'racas':racas})
+        return render(request, 'novo_registro.html')
     elif request.method == "POST":
-        foto = request.FILES.get('foto')    
-        nome = request.POST.get('nome')
-        descricao = request.POST.get('descricao')
-        estado = request.POST.get('estado')
-        cidade = request.POST.get('cidade')
-        telefone = request.POST.get('telefone')
-        tags = request.POST.getlist('tags')
-        raca = request.POST.get('raca')
+        dt  = request.POST.get('dt')
+        m3    = request.POST.get('m3')
+        total = request.POST.get('total')
         
         #TODO: Validar dados
 
-        pet = Pet(
+        medicao = Medicao(
             usuario=request.user,
-            foto=foto,
-            nome=nome,
-            descricao=descricao,
-            estado=estado,
-            cidade=cidade,
-            telefone=telefone,
-            raca_id=raca,
+            dt=dt,
+            m3=m3,
+            total=total,
          )
 
-        pet.save()
+        medicao.save()
         
-        for tag_id in tags:
-            tag = Tag.objects.get(id=tag_id)
-            pet.tags.add(tag)
-
-        pet.save()
-        tags = Tag.objects.all()
-        racas = Raca.objects.all()
+        medicao.save()
         
-        messages.add_message(request, constants.SUCCESS, 'Novo pet cadastrado')
+        messages.add_message(request, constants.SUCCESS, 'Nova medição cadastrada')
         
-        return render(request, 'novo_pet.html', {'tags': tags, 'racas': racas})
+        return render(request, 'novo_registro.html')
     
 @login_required
 def seus_registros(request):
     if request.method == "GET":
-        pets = Pet.objects.filter(usuario=request.user)
-        return render(request, 'seus_registros.html', {'pets': pets})
+        medicao = Medicao.objects.filter(usuario=request.user)
+        return render(request, 'seus_registros.html', {'medicao': medicao})
     
 @login_required
 def remover_registro(request, id):
-    pet = Pet.objects.get(id=id)
+    medicao = Medicao.objects.get(id=id)
     
-    if not pet.usuario == request.user:
-        messages.add_message(request, constants.ERROR, 'Esse pet não é seu!')
+    if not medicao.usuario == request.user:
+        messages.add_message(request, constants.ERROR, 'Essa medição pertence a outro usuário!')
         return redirect('/divulgar/seus_registros')
 
-    pet.delete()
+    medicao.delete()
     messages.add_message(request, constants.SUCCESS, 'Removido com sucesso.')
     return redirect('/divulgar/seus_registros')
 
 @login_required
 def ver_registro(request, id):
     if request.method == "GET":
-        pet = Pet.objects.get(id = id)
-        return render(request, 'ver_registro.html', {'pet': pet})
+        medicao = Medicao.objects.get(id = id)
+        return render(request, 'ver_registro.html', {'medicao': medicao})
     
 @login_required    
 def dashboard(request):
     if request.method == "GET":
         return render(request, 'dashboard.html')
-
-    
-@csrf_exempt
-def api_adocoes_por_raca(request):
-    racas = Raca.objects.all()
-
-    qtd_adocoes = []
-    for raca in racas:
-        adocoes = PedidoAdocao.objects.filter(pet__raca=raca).count()
-        qtd_adocoes.append(adocoes)
-
-    racas = [raca.raca for raca in racas]
-    data = {'qtd_adocoes': qtd_adocoes,
-            'labels': racas}
-
-    return JsonResponse(data) 

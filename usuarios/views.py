@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 
 def cadastro(request):
     if request.user.is_authenticated:
-        return redirect('/divulgar/novo_pet')
+        return redirect('/divulgar/novo_registro')
     if request.method == "GET":
         return render(request, 'cadastro.html')
     elif request.method == "POST" :
@@ -34,7 +34,7 @@ def cadastro(request):
             )
             # Mensagem sucesso
             messages.add_message(request, constants.SUCCESS, 'Usuário criado com sucesso!')
-            return render(request, 'cadastro.html')
+            return render(request, 'login.html')
         except:
             # Mensagem erro
             messages.add_message(request, constants.ERROR, 'Erro interno do sistema')

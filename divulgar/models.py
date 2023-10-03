@@ -1,34 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 
-# Create your models here.
-  
-class Raca(models.Model):
-    raca = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.raca    
+# Create your models here.   
     
-class Tag(models.Model):
-    tag = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.tag    
-    
-class Pet(models.Model):
-    choices_status = (('P', 'Para adoção'),
-                      ('A', 'Adotado'))
+class Medicao(models.Model):
     
     usuario = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    foto = models.ImageField(upload_to="fotos_pets")
-    nome = models.CharField(max_length=100)
-    descricao = models.TextField()
-    estado = models.CharField(max_length=50)
-    cidade = models.CharField(max_length=50)
-    telefone = models.CharField(max_length=50)
-    tags = models.ManyToManyField(Tag)
-    raca = models.ForeignKey(Raca, on_delete=models.DO_NOTHING)
-    status = models.CharField(max_length=1, choices=choices_status, default='P')
+    dt      = models.DateField(default=datetime.now)
+    m3      = models.FloatField()
+    total   = models.FloatField()
     
     def __str__(self):
-        return self.nome
+        return self.usuario

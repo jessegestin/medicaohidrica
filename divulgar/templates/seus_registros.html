@@ -15,7 +15,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-2 bg-side sidebar">
-                    <h2>ADO.TE</h2>
+                    <h2>MEDI.HIDRI</h2>
                     <hr>
                     
                     <ul>
@@ -29,7 +29,7 @@
                     </ul>  
 
                      <ul>
-                        <li>Adoção</li>
+                        <li>Gráfico</li>
                             <ul>
                                 <li><a href="{% url 'dashboard' %}" rel="stylesheet"> Dashboard </a></li>
                             </ul>
@@ -54,37 +54,28 @@
                                     </div>
                                 {% endfor %}
                             {% endif %}
-                            <h3 class="font-vinho">Seus Pets</h3>
+                            <h3 class="font-vinho">Seus Registros</h3>
                             <hr>
 
                              <table class="tabela" cellpadding="20">
                                 <tr>
-                                    <th>Foto</th>
-                                    <th>Nome</th>
-                                    <th>Raça</th>
-                                    <th>Status</th>
-                                    <th>Remover</th>
+                                    <th>Data de Medição</th>
+                                    <th>Valor Cúbico (M3)</th>
+                                    <th>Valor Total (R$)</th>
                                 </tr>
-                                    {% for pet in pets %}
+                                    {% for medicao in medicao %}
                                         <tr class="tabela-linha">
-                                            <td width="20%">
-                                                <img width="40%" src="{{pet.foto.url}}">
+                                            <td>
+                                                {{medicao.dt}}
                                             </td>
                                             <td>
-                                                {{pet.nome}}
+                                                {{medicao.m3}}
                                             </td>
                                             <td>
-                                                {{pet.raca}}
+                                                {{medicao.total}}
                                             </td>
                                             <td>
-                                                {% if pet.status == "P" %}
-                                                    <span class="badge text-bg-primary"> Para Adoção </span>
-                                                {% elif pet.status == "A" %}    
-                                                    <span class="badge text-bg-success"> Adotado </span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <a href="{% url 'remover_pet' pet.id %}" class="btn btn-danger">REMOVER</a>
+                                                <a href="{% url 'remover_registro' medicao.id %}" class="btn btn-danger">REMOVER</a>
                                             </td>
                                         </tr>
                                     {% endfor %}
