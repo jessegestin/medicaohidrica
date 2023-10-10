@@ -76,6 +76,25 @@
                     </table>
                 </div>
             </div>
+
+            <div class="pagination">
+            <span class="step-links">
+                {% if medicao.has_previous %}
+                    <a href="?page=1">&laquo; primeira</a>
+                    <a href="?page={{ medicao.previous_page_number }}">anterior</a>
+                {% endif %}
+
+                <span class="current">
+                    Página {{ medicao.number }} de {{ medicao.paginator.num_pages }}.
+                </span>
+
+                {% if medicao.has_next %}
+                    <a href="?page={{ medicao.next_page_number }}">próxima</a>
+                    <a href="?page={{ medicao.paginator.num_pages }}">última &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+
         </div>
     </div>
 </div>

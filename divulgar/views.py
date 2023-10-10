@@ -11,49 +11,58 @@ import json
 from django.views.decorators.http import require_GET
 import babel
 from babel import numbers
-# Importe o módulo decimal para lidar com números decimais
-import decimal
+import decimal # Importe o módulo decimal para lidar com números decimais
+from django.core.paginator import Paginator # Paginação
+from django.core.exceptions import ObjectDoesNotExist  # Importe a exceção ObjectDoesNotExist
+
 
 @login_required
 def novo_registro(request):
     if request.method == "GET":
         return render(request, 'novo_registro.html')
     elif request.method == "POST":
-        dt  = request.POST.get('dt')
-        m3    = request.POST.get('m3')
+        dt = request.POST.get('dt')
+        m3 = request.POST.get('m3')
         total = request.POST.get('total')
-        
-        #TODO: Validar dados
 
-        medicao = Medicao(
-            usuario=request.user,
-            dt=dt,
-            m3=m3,
-            total=total,
-         )
+        # Verifique se uma medição com a mesma data já existe para o usuário atual
+        existing_medicao = Medicao.objects.filter(usuario=request.user, dt=dt).first()
+        if existing_medicao:
+            messages.error(request, 'Já existe uma medição com essa data.')
+        else:
+            medicao = Medicao(
+                usuario=request.user,
+                dt=dt,
+                m3=m3,
+                total=total,  # Certifique-se de que o campo total seja preenchido corretamente
+            )
+            medicao.save()
+            messages.success(request, 'Nova medição cadastrada')
 
-        medicao.save()
-        
-        medicao.save()
-        
-        messages.add_message(request, constants.SUCCESS, 'Nova medição cadastrada')
-        
         return render(request, 'novo_registro.html')
     
 @login_required
 def seus_registros(request):
     if request.method == "GET":
         medicao = Medicao.objects.filter(usuario=request.user).order_by('dt')
-        
+
+        # Criar um objeto Paginator com sua consulta e a quantidade de itens por página
+        paginator = Paginator(medicao, 10)  # 10 itens por página
+
+        # Obter o número da página da consulta GET
+        page_number = request.GET.get('page')
+        # Obter a página da consulta
+        page = paginator.get_page(page_number)
+
         # Configurar o ambiente para o formato de moeda brasileira
         brazilian_locale = babel.Locale('pt_BR')
-        
+
         # Formatar os valores como moeda antes de passá-los para o modelo
-        for m in medicao:            
+        for m in page:
             m.m3_formatado = "{:.2f}".format(decimal.Decimal(m.m3)).replace('.', ',')
             m.total_formatado = numbers.format_currency(m.total, 'BRL', locale=brazilian_locale)
-        
-        return render(request, 'seus_registros.html', {'medicao': medicao})
+
+        return render(request, 'seus_registros.html', {'medicao': page})
     
 @login_required
 def remover_registro(request, id):

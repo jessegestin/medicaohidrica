@@ -1,15 +1,17 @@
 .bg-side {
 	background-color: #391D34;
 	color: white;
-	min-height: 100vh; /* Defina uma altura mínima de 100% da visualização da página */
-	display: flex; /* Use o Flexbox para alinhar o conteúdo verticalmente */
-	flex-direction: column; /* Alinhe o conteúdo verticalmente */
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	transition: 0.3s;
 }
 
 .sidebar {
 	flex: 1; /* Faça a barra lateral ocupar todo o espaço disponível verticalmente */
 	padding: 20px;
 	overflow-y: auto; /* Adicione uma barra de rolagem se o conteúdo for longo */
+	transition: 0.3s;
 }
 
 .col-md {
@@ -17,6 +19,6 @@
 	padding: 20px;
 }
 
-.font-vinho{
-    color: #A24D52;
+.font-vinho {
+	color: #A24D52;
 }
