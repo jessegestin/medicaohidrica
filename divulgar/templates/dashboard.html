@@ -1,79 +1,165 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cadastro</title>
+    <title>Gráfico</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'usuarios/css/cadastro.css' %}" rel="stylesheet">
-    <link href="{% static 'divulgar/css/novo_registro.css' %}" rel="stylesheet">
-    <link href="{% static 'divulgar/css/seus_registros.css' %}" rel="stylesheet">
-    </head>
-    <body>
+    <link href="{% static 'divulgar/css/dashboard.css' %}" rel="stylesheet">
 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-2 bg-side sidebar">
-                    <h2>MEDI.HIDRI</h2>
-                    <hr>
-                   
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        /* CSS para a div de gráfico com barra de rolagem */
+        .chart-container {
+            overflow-x: scroll; /* Adicione uma barra de rolagem vertical */
+            width: 750px; /* Largura da div do gráfico */
+            height: 450px; /* Altura da div do gráfico */
+        }        
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 bg-side sidebar">
+                <h2>MEDI.HIDRI</h2>
+                <hr>
+
+                <!-- Menu lateral -->
+                <ul>
+                    <li>Cadastros</li>
                     <ul>
-                        <li>Cadastros</li>
-                            <ul>
-                                <li><a href="{% url 'novo_registro' %}" rel="stylesheet"> Cadastrar Registro </a></li>
-                            </ul>   
-                            <ul>
-                                <li><a href="{% url 'seus_registros' %}" rel="stylesheet"> Seus Registros </a></li>
-                            </ul>   
-                    </ul>  
-
-                     <ul>
-                        <li>Gráfico</li>
-                            <ul>
-                                <li><a href="{% url 'dashboard' %}" rel="stylesheet"> Dashboard </a></li>
-                            </ul>
-                     </ul>
-
-                    <ul>
-                        <li>Opções</li>
-                            <ul>
-                                <li><a href="{% url 'sair' %}" rel="stylesheet"> Logout </a></li>
-                            </ul>
+                        <li><a href="{% url 'novo_registro' %}" rel="stylesheet"> Cadastrar Registro </a></li>
                     </ul>
+                    <ul>
+                        <li><a href="{% url 'seus_registros' %}" rel="stylesheet"> Seus Registros </a></li>
+                    </ul>
+                </ul>
+
+                <ul>
+                    <li>Gráfico</li>
+                    <ul>
+                        <li><a href="{% url 'dashboard' %}" rel="stylesheet"> Dashboard </a></li>
+                    </ul>
+                </ul>
+
+                <ul>
+                    <li>Opções</li>
+                    <ul>
+                        <li><a href="{% url 'sair' %}" rel="stylesheet"> Logout </a></li>
+                    </ul>
+                </ul>
+            </div>
+            <div class="col-md">
+                <div class="wrapper">
+                    <div class="box">
+                        <div class="header-box">
+                            <h3 class="font-vinho">Gráfico de Medição de M3</h3>
+                            <hr>
+                        </div>
+                        <div class="body-box">
+                            <!-- Menu suspenso para selecionar o mês -->
+                            <label for="selectMes">Selecione o mês:</label>
+                            <select id="selectMes">
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+
+                            <div class="chart-container">
+                                <canvas id="meuGrafico"></canvas>
+                            </div>
+
+                            <script>
+                                var ctx = document.getElementById('meuGrafico').getContext('2d');
+                                var myChart; // Declaração do gráfico como variável global
+
+                                // Função para atualizar a URL com o mês selecionado
+                                function updateURL(selectedMonth) {
+                                    window.history.pushState({}, '', '/divulgar/dashboard/' + selectedMonth + '/');
+                                }
+
+                                // Função para fazer a solicitação AJAX e atualizar o gráfico
+                                function fetchDataAndRefreshChart(selectedMonth) {
+                                    $.ajax({
+                                        url: '/divulgar/dashboard/' + selectedMonth + '/',
+                                        method: 'GET',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            // Converta as strings de datas e valores em matrizes JavaScript usando JSON.parse
+                                            var datas = JSON.parse(data.datas);
+                                            var valores = JSON.parse(data.valores);
+
+                                            // Atualize os dados do gráfico com as matrizes convertidas
+                                            myChart.data.labels = datas;
+                                            myChart.data.datasets[0].data = valores;
+                                            myChart.update();
+                                        },
+                                        error: function() {
+                                            console.error('Erro ao buscar dados do mês.');
+                                        }
+                                    });
+                                }
+
+                                // Função para lidar com a alteração do mês selecionado
+                                function handleMonthChange() {
+                                    var selectedMonth = this.value;
+                                    updateURL(selectedMonth); // Atualize a URL
+                                    fetchDataAndRefreshChart(selectedMonth); // Busque e atualize os dados do gráfico
+                                }
+
+                                // Adicione um listener de evento de mudança para o menu suspenso de mês
+                                document.getElementById('selectMes').addEventListener('change', handleMonthChange);
+
+                                // Crie o gráfico inicial (vazio)
+                                myChart = new Chart(ctx, {
+                                    type: 'line',  // Tipo de gráfico
+                                    data: {
+                                        labels: [],  // Rótulos vazios inicialmente
+                                        datasets: [{
+                                            label: 'Valor Metro Cúbico Consumido (M3)',
+                                            data: [],  // Dados vazios inicialmente
+                                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                            borderColor: 'rgba(255, 99, 132, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        scales: {
+                                            x: {
+                                                beginAtZero: true,  // Comece o eixo X a partir de zero
+                                                stepSize: 1  // Defina o tamanho do passo para 1
+                                            },
+                                            y: {
+                                                beginAtZero: true  // Comece o eixo Y a partir de zero
+                                            }
+                                        }
+                                    }
+                                });
+
+                                // Ao carregar a página, carregue os dados do mês atual
+                                fetchDataAndRefreshChart($('#selectMes').val());
+
+                            </script>
+                        </div>
+                    </div>
                 </div>
-
-                <div style="padding:60px" class="col-md">
-
-                    <h3 class="font-vinho">Quantidade de registros por casa.</h3>
-                     <div style="width: 60%;">
-                        <canvas id="myChart"></canvas>
-                    </div>  
-                </div>
-
             </div>
         </div>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-    
-        
-    
-                const config = {
-                    type: 'line',
-                    data: data,
-                    options: {}
-                };
-    
-                const myChart = new Chart(
-                    document.getElementById('myChart'),
-                    config
-                );
-    
-             
-    
-        </script>    
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+</body>
 </html>
