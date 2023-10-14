@@ -8,4 +8,6 @@ urlpatterns = [
     path('ver_registro/<int:id>', views.ver_registro, name="ver_registro"),
     path('dashboard/', views.dashboard, name="dashboard"),
     path('dashboard/<str:selected_month>/', views.dashboard, name='dashboard'),
+    path('dashboard_totalizado/', views.dashboard_totalizado, name="dashboard_totalizado"),
+    path('dashboard_totalizado/<str:selected_year>/', views.dashboard_totalizado, name='dashboard_totalizado'),
 ]

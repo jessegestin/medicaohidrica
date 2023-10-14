@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gráfico</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'divulgar/css/dashboard.css' %}" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>      
+
+    <style>
+        /* CSS para a div de gráfico com barra de rolagem */
+        .chart-container {
+            overflow-x: scroll;
+            width: 750px;
+            height: 450px;
+        }        
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 bg-side sidebar" id="sidebar">
+                <h2>MEDI.HIDRI</h2>
+                <hr>
+
+                <!-- Menu lateral -->
+                <ul>
+                    <li>Cadastros</li>
+                    <ul>
+                        <li><a href="{% url 'novo_registro' %}" rel="stylesheet"> Cadastrar Registro </a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="{% url 'seus_registros' %}" rel="stylesheet"> Seus Registros </a></li>
+                    </ul>
+                </ul>
+
+                <ul>
+                    <li>Gráficos</li>
+                    <ul>
+                        <li><a href="{% url 'dashboard' %}" rel="stylesheet"> Medição Mensal </a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="{% url 'dashboard_totalizado' %}" rel="stylesheet"> Medição Anual </a></li>
+                    </ul>
+                </ul>
+
+                <ul>
+                    <li>Opções</li>
+                    <ul>
+                        <li><a href="{% url 'sair' %}" rel="stylesheet"> Logout </a></li>
+                    </ul>
+                </ul>
+            </div>
+            <div class="col-md">
+                <div class="wrapper">
+                    <div class="box">
+                        <div class="header-box">
+                            <h3 class="font-vinho">Gráfico de Medição de M3</h3>
+                            <hr>
+                        </div>
+                        <div class="body-box">
+                            <!-- Menu suspenso para selecionar o ano -->
+                            <label for="selectAno">Selecione o ano:</label>
+                            <select id="selectAno">
+                                {% for ano in anos %}
+                                    <option value="{{ ano }}">{{ ano }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div class="chart-container">
+                                <canvas id="meuGraficoTotalizado"></canvas>
+                            </div>
+
+                            <script>
+                                var ctx = document.getElementById('meuGraficoTotalizado').getContext('2d');
+                                var myChart; // Declaração do gráfico como variável global
+
+                                // Função para atualizar o URL com o ano selecionado
+                                function updateURL(selectedYear) {
+                                    window.history.pushState({}, '', '/divulgar/dashboard_totalizado/' + selectedYear + '/');
+                                }
+
+                                // Função para fazer a solicitação AJAX e atualizar o gráfico
+                                function fetchDataAndRefreshChart(selectedYear) {
+                                    $.ajax({
+                                        url: '/divulgar/dashboard_totalizado/' + selectedYear + '/',
+                                        method: 'GET',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            try {
+                                                if (data) {
+                                                    var mesesEmPortugues = [
+                                                        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                                                        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+                                                    ];
+
+                                                    // Certifique-se de que os dados não sejam 'undefined'
+                                                    var meses = data.meses; // Obtenha os meses
+                                                    var valores = data.valores; // Obtenha os valores
+
+                                                    if (meses && valores) {
+                                                        // Certifique-se de que as matrizes meses e valores não sejam 'undefined'
+                                                        myChart.data.labels = mesesEmPortugues;
+                                                        myChart.data.datasets[0].data = valores;
+                                                        myChart.update();
+                                                    } else {
+                                                        console.error('Meses ou valores ausentes ou vazios.');
+                                                    }
+                                                } else {
+                                                    console.error('Dados nulos ou vazios.');
+                                                }
+                                            } catch (error) {
+                                                console.error('Erro ao analisar dados JSON:', error);
+                                                console.log('Resposta completa:', data);
+                                            }
+                                        },
+                                        error: function() {
+                                            console.error('Erro ao buscar dados do ano.');
+                                        }
+                                    });
+                                }
+
+                                // Função para lidar com a alteração do ano selecionado
+                                function handleYearChange() {
+                                    var selectedYear = selectAno.value;
+                                    updateURL(selectedYear); // Atualize a URL
+                                    fetchDataAndRefreshChart(selectedYear); // Busque e atualize os dados do gráfico
+                                }
+
+                                // Adicione um listener de evento de mudança para o menu suspenso de ano
+                                var selectAno = document.getElementById("selectAno");
+                                selectAno.addEventListener("change", handleYearChange);
+
+                                // Crie o gráfico inicial (vazio)
+                                myChart = new Chart(ctx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: [],
+                                        datasets: [{
+                                            label: 'Total de Valores Cúbicos Consumidos por Mês (M3)',
+                                            data: [],
+                                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                            borderColor: 'rgba(255, 99, 132, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        scales: {
+                                            x: {
+                                                beginAtZero: true,
+                                                stepSize: 1,
+                                                title: {
+                                                    display: true,
+                                                    text: 'Meses do Ano'
+                                                }
+                                            },
+                                            y: {
+                                                beginAtZero: true,
+                                                title: {
+                                                    display: true,
+                                                    text: 'Valores Cúbicos'
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+
+                                // Ao carregar a página, carregue os dados do ano selecionado
+                                fetchDataAndRefreshChart(selectAno.value);
+
+                                console.log('Solicitando dados para o ano:', selectAno.value);
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

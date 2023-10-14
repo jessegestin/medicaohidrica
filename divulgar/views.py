@@ -14,7 +14,9 @@ from babel import numbers
 import decimal # Importe o módulo decimal para lidar com números decimais
 from django.core.paginator import Paginator # Paginação
 from django.core.exceptions import ObjectDoesNotExist  # Importe a exceção ObjectDoesNotExist
-
+from django.db.models import ExpressionWrapper, F, FloatField, Value, Sum
+from datetime import date
+from django.db.models.functions import ExtractMonth, Coalesce
 
 @login_required
 def novo_registro(request):
@@ -118,3 +120,55 @@ def dashboard(request, selected_month=None):
         return JsonResponse(context)  # Se a solicitação for AJAX, retorne uma resposta JSON
     else:
         return render(request, 'dashboard.html', context)
+    
+@require_GET
+def dashboard_totalizado(request, selected_year=None):
+    if selected_year is None:
+        selected_year = date.today().year
+    else:
+        try:
+            selected_year = int(selected_year)
+        except ValueError:
+            selected_year = None
+
+    # Gere uma lista de anos de algum ano inicial até o ano atual
+    ano_inicial = 2000  # Escolha o ano inicial desejado
+    anos = [str(ano) for ano in range(ano_inicial, date.today().year + 1)]
+
+    if selected_year is not None:
+        dados_medicao = Medicao.objects.filter(
+            usuario=request.user,
+            dt__year=selected_year
+        )
+
+        # Crie listas para meses e valores totais
+        meses = [str(mes) for mes in range(1, 13)]
+        valores = [0.0] * 12  # Preencha com zeros como valor padrão
+
+        if dados_medicao:
+            # Anote os valores para cada mês
+            for mes in range(1, 13):
+                
+                total_mes = dados_medicao.filter(dt__month=mes).aggregate(total_m3=Sum('m3'))
+                if total_mes['total_m3']:
+                    valores[mes - 1] = total_mes['total_m3']
+
+        context = {
+            'anos': anos,  # Sua lista de anos
+            'selectedYear': selected_year,  # O ano selecionado
+            'meses': meses,
+            'valores': valores,
+        }
+    else:
+        # Lida com o caso em que selected_year é None
+        context = {
+            'anos': anos,
+            'selectedYear': selected_year,
+            'meses': [],
+            'valores': [],
+        }
+
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        return JsonResponse(context)
+    else:
+        return render(request, 'dashboard_totalizado.html', context)

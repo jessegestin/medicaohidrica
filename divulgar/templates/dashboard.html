@@ -40,9 +40,12 @@
                 </ul>
 
                 <ul>
-                    <li>Gráfico</li>
+                    <li>Gráficos</li>
                     <ul>
-                        <li><a href="{% url 'dashboard' %}" rel="stylesheet"> Dashboard </a></li>
+                        <li><a href="{% url 'dashboard' %}" rel="stylesheet"> Medição Mensal </a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="{% url 'dashboard_totalizado' %}" rel="stylesheet"> Medição Anual </a></li>
                     </ul>
                 </ul>
 
@@ -140,11 +143,20 @@
                                         scales: {
                                             x: {
                                                 beginAtZero: true,  // Comece o eixo X a partir de zero
-                                                stepSize: 1  // Defina o tamanho do passo para 1
+                                                stepSize: 1,  // Defina o tamanho do passo para 1
+                                                title: {
+                                                    display: true,
+                                                    text: 'Dias Medidos no Mês'  // Rótulo para o eixo Y
+                                                }
                                             },
                                             y: {
-                                                beginAtZero: true  // Comece o eixo Y a partir de zero
+                                                beginAtZero: true,  // Comece o eixo Y a partir de zero
+                                                title: {
+                                                    display: true,
+                                                    text: 'Valores Cúbicos'  // Rótulo para o eixo Y
+                                                }
                                             }
+                                            
                                         }
                                     }
                                 });
