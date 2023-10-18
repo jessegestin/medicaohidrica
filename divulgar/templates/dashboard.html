@@ -81,6 +81,14 @@
                                 <option value="12">Dezembro</option>
                             </select>
 
+                            <!-- Menu suspenso para selecionar o ano -->
+                            <label for="selectAno">Selecione o ano:</label>
+                            <select id="selectAno">
+                                {% for ano in anos %}
+                                    <option value="{{ ano }}">{{ ano }}</option>
+                                {% endfor %}
+                            </select>
+
                             <div class="chart-container">
                                 <canvas id="meuGrafico"></canvas>
                             </div>
@@ -89,15 +97,15 @@
                                 var ctx = document.getElementById('meuGrafico').getContext('2d');
                                 var myChart; // Declaração do gráfico como variável global
 
-                                // Função para atualizar a URL com o mês selecionado
-                                function updateURL(selectedMonth) {
-                                    window.history.pushState({}, '', '/divulgar/dashboard/' + selectedMonth + '/');
+                                // Função para atualizar a URL com o mês e ano selecionados
+                                function updateURL(selectedMonth, selectedYear) {
+                                    window.history.pushState({}, '', '/divulgar/dashboard/' + selectedMonth + '/' + selectedYear + '/');
                                 }
 
                                 // Função para fazer a solicitação AJAX e atualizar o gráfico
-                                function fetchDataAndRefreshChart(selectedMonth) {
+                                function fetchDataAndRefreshChart(selectedMonth, selectedYear) {
                                     $.ajax({
-                                        url: '/divulgar/dashboard/' + selectedMonth + '/',
+                                        url: '/divulgar/dashboard/' + selectedMonth + '/' + selectedYear + '/',
                                         method: 'GET',
                                         dataType: 'json',
                                         success: function(data) {
@@ -118,13 +126,18 @@
 
                                 // Função para lidar com a alteração do mês selecionado
                                 function handleMonthChange() {
-                                    var selectedMonth = this.value;
-                                    updateURL(selectedMonth); // Atualize a URL
-                                    fetchDataAndRefreshChart(selectedMonth); // Busque e atualize os dados do gráfico
+                                    var selectedMonth = document.getElementById('selectMes').value;
+                                    var selectedYear = document.getElementById('selectAno').value;
+
+                                    updateURL(selectedMonth, selectedYear); // Atualize a URL
+                                    fetchDataAndRefreshChart(selectedMonth, selectedYear); // Busque e atualize os dados do gráfico
                                 }
 
                                 // Adicione um listener de evento de mudança para o menu suspenso de mês
                                 document.getElementById('selectMes').addEventListener('change', handleMonthChange);
+
+                                // Adicione um listener de evento de mudança para o menu suspenso de ano
+                                document.getElementById('selectAno').addEventListener('change', handleMonthChange);
 
                                 // Crie o gráfico inicial (vazio)
                                 myChart = new Chart(ctx, {
