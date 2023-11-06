@@ -18,6 +18,8 @@ from django.db.models import ExpressionWrapper, F, FloatField, Value, Sum
 from datetime import date
 from django.db.models.functions import ExtractMonth, Coalesce
 from django.utils import timezone
+import requests
+from django.views.decorators.csrf import csrf_protect
 
 @login_required
 def novo_registro(request):
@@ -182,3 +184,28 @@ def dashboard_totalizado(request, selected_year=None):
         return JsonResponse(context)
     else:
         return render(request, 'dashboard_totalizado.html', context)
+    
+def weather(request):
+    if request.method == 'POST':
+        city = request.POST.get('city', 'São Paulo')
+    else:
+        city = 'São Paulo'  # Define uma cidade padrão se o formulário ainda não foi enviado
+
+    api_key = '516799d727d8e5d0a83f646330828738'
+    api_url = f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&lang=pt_br'
+
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        data = response.json()
+        weather_description = data['weather'][0]['description']
+        temperature = data['main']['temp']
+        temperature_formatada = f'{temperature / 10:.1f} ºC'
+
+        return render(request, 'weather.html', {
+            'weather_description': weather_description,
+            'temperature': temperature_formatada,
+            'city': city
+        })
+    else:
+        return render(request, 'error.html', {'message': 'Erro na solicitação. Código de status: ' + str(response.status_code)})

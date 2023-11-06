@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Previsão do Tempo</title>
+</head>
+<body>
+    <form method="post" action="{% url 'weather' %}">
+        {% csrf_token %}
+        
+        <input type="text" class="form-control" placeholder="Digite sua cidade..." name="city">
+        <button type="submit">Obter Previsão</button>
+    </form>
+
+    <h1>Previsão do Tempo para {{city}}</h1>
+        
+    <p><strong>Condições Meteorológicas:</strong> {{ weather_description }}</p>
+    <p><strong>Temperatura:</strong> {{ temperature }}</p>
+</body>
+</html>

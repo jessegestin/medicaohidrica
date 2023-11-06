@@ -10,4 +10,5 @@ urlpatterns = [
     path('dashboard/<str:selected_month>/<str:selected_year>/', views.dashboard, name='dashboard'),
     path('dashboard_totalizado/', views.dashboard_totalizado, name="dashboard_totalizado"),
     path('dashboard_totalizado/<str:selected_year>/', views.dashboard_totalizado, name='dashboard_totalizado'),
+    path('weather/', views.weather, name="weather"),
 ]
