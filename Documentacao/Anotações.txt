@@ -179,3 +179,27 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #Rota static do Python Anywhere:
 static = /home/jessegestin/medicaohidrica/templates/static
 media = /home/jessegestin/medicaohidrica/templates/static
+
+heroku179jc@
+source /home/jessegestin/medicaohidrica/bd/medicaohidrica_django_session.sql;
+
+/home/jessegestin/medicaohidrica/static
+/home/jessegestin/medicaohidrica/templates/static
+
+/home/jessegestin/medicaohidrica/media
+
+git remote add heroku https://git.heroku.com/MEDICAOHIDRICA.git
+git push heroku main:main
+
+heroku create MEDICAOHIDRICA
+pythonanywhere179@jc
+
+0123987456@
+mysql -u jessegestin@% -p0123987456@
+
+871359
+
+030etec179mb@jc1823
+
+pip install sqlalchemy
+pip install PyMySQL
